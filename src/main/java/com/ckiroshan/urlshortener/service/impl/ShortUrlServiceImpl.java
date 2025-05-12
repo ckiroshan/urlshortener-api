@@ -4,6 +4,7 @@ import com.ckiroshan.urlshortener.dto.ShortUrlRequest;
 import com.ckiroshan.urlshortener.dto.ShortUrlResponse;
 import com.ckiroshan.urlshortener.entity.ShortUrl;
 import com.ckiroshan.urlshortener.exception.BadRequestException;
+import com.ckiroshan.urlshortener.exception.ResourceNotFoundException;
 import com.ckiroshan.urlshortener.mapper.ShortUrlMapper;
 import com.ckiroshan.urlshortener.repository.ShortUrlRepository;
 import com.ckiroshan.urlshortener.service.ShortUrlService;
@@ -29,5 +30,14 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         ShortUrl shortUrl = shortUrlMapper.dtoToEntity(shortUrlRequest);
         // Convert saved entity back to response DTO
         return shortUrlMapper.entityToDto(shortUrlRepository.save(shortUrl));
+    }
+
+    @Override
+    public String getOriginalUrl(String shortCode) {
+        // Look up the original URL by short code
+        return shortUrlRepository.findByShortCode(shortCode)
+                .map(ShortUrl::getOriginalUrl)
+                // Throw 404 if not found
+                .orElseThrow(() -> new ResourceNotFoundException("Short URL not found"));
     }
 }
