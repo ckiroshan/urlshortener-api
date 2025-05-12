@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
     // Checks if shortCode already exists in DB
     boolean existsByShortCode(String shortCode);
+    // Retrieves a ShortUrl entity by its short code, if present
+    Optional<ShortUrl> findByShortCode(String shortCode);
 }
