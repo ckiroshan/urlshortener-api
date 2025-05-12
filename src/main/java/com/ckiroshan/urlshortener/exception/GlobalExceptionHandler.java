@@ -37,4 +37,16 @@ public class GlobalExceptionHandler {
         // Returns a structured error response.
         return ResponseEntity.badRequest().body(error);
     }
+
+    // Handles custom Resource Not Found Exceptions
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),    // HTTP status code (404)
+                ex.getMessage(),                // Error message from exception
+                System.currentTimeMillis()     // Timestamp of error
+        );
+        // Returns a structured error response.
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
 }
