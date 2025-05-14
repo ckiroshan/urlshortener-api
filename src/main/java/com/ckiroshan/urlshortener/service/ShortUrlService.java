@@ -8,4 +8,6 @@ public interface ShortUrlService {
     ShortUrlResponse createShortUrl(ShortUrlRequest shortUrlRequest);
     // Retrieves original URL associated with given short code
     String getOriginalUrl(String shortCode);
+    // Deletes an existing short code
+    void deleteShortUrl(String shortCode);
 }

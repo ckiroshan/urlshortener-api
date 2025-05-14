@@ -10,6 +10,8 @@ import com.ckiroshan.urlshortener.repository.ShortUrlRepository;
 import com.ckiroshan.urlshortener.service.ShortUrlService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,11 +35,24 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
+    @Cacheable(value = "shortUrls", key = "#shortCode") // Caches original URL lookup by shortCode
     public String getOriginalUrl(String shortCode) {
         // Look up the original URL by short code
         return shortUrlRepository.findByShortCode(shortCode)
                 .map(ShortUrl::getOriginalUrl)
                 // Throw 404 if not found
                 .orElseThrow(() -> new ResourceNotFoundException("Short URL not found"));
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "shortUrls", key = "#shortCode") // Evicts cached URL on deletion
+    public void deleteShortUrl(String shortCode) {
+        // Find short URL entity
+        ShortUrl shortUrl = shortUrlRepository.findByShortCode(shortCode)
+                // Throw 404 if not found
+                .orElseThrow(() -> new ResourceNotFoundException("Short URL not found"));
+        // Delete the entity from DB
+        shortUrlRepository.delete(shortUrl);
     }
 }
