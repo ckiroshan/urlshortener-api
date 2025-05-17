@@ -1,6 +1,7 @@
 package com.ckiroshan.urlshortener.user.controller;
 
 import com.ckiroshan.urlshortener.user.dto.AuthResponse;
+import com.ckiroshan.urlshortener.user.dto.LoginRequest;
 import com.ckiroshan.urlshortener.user.dto.RegisterRequest;
 import com.ckiroshan.urlshortener.user.service.AuthService;
 import jakarta.validation.Valid;
@@ -22,5 +23,11 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request) {
         // Call service to register new user & return the JWT response
         return ResponseEntity.ok(authService.register(request));
+    }
+
+    @PostMapping("/login")  // Endpoint for user login
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        // Call service to authenticate user & return the JWT response
+        return ResponseEntity.ok(authService.login(request));
     }
 }
