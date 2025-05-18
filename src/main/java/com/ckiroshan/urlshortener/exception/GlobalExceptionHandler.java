@@ -2,6 +2,7 @@ package com.ckiroshan.urlshortener.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,5 +49,29 @@ public class GlobalExceptionHandler {
         );
         // Returns a structured error response.
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    // Handles custom Username Not Found Exceptions
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),    // HTTP status code (401)
+                ex.getMessage(),                   // Error message from exception
+                System.currentTimeMillis()        // Timestamp of error
+        );
+        // Returns a structured error response
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    // Handles custom Authentication Exceptions
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),    // HTTP status code (401)
+                ex.getMessage(),                   // Error message from exception
+                System.currentTimeMillis()        // Timestamp of error
+        );
+        // Returns a structured error response
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 }
