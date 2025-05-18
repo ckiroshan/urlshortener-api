@@ -8,6 +8,7 @@ import com.ckiroshan.urlshortener.exception.ResourceNotFoundException;
 import com.ckiroshan.urlshortener.mapper.ShortUrlMapper;
 import com.ckiroshan.urlshortener.repository.ShortUrlRepository;
 import com.ckiroshan.urlshortener.service.ShortUrlService;
+import com.ckiroshan.urlshortener.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,7 +23,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     @Override
     @Transactional // Ensures atomic DB operations
-    public ShortUrlResponse createShortUrl(ShortUrlRequest shortUrlRequest) {
+    public ShortUrlResponse createShortUrl(ShortUrlRequest shortUrlRequest, User user) {
         // Check if provided custom code already exists
         if (shortUrlRequest.getCustomShortCode() != null &&
                 shortUrlRepository.existsByShortCode(shortUrlRequest.getCustomShortCode())) {
@@ -30,6 +31,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         }
         // Convert request DTO to entity and persist it to DB
         ShortUrl shortUrl = shortUrlMapper.dtoToEntity(shortUrlRequest);
+        shortUrl.setUser(user); // Associate URL with the currently logged-in user
         // Convert saved entity back to response DTO
         return shortUrlMapper.entityToDto(shortUrlRepository.save(shortUrl));
     }
