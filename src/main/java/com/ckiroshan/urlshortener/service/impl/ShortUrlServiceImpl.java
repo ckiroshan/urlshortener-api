@@ -9,6 +9,7 @@ import com.ckiroshan.urlshortener.mapper.ShortUrlMapper;
 import com.ckiroshan.urlshortener.repository.ShortUrlRepository;
 import com.ckiroshan.urlshortener.service.ShortUrlService;
 import com.ckiroshan.urlshortener.user.entity.User;
+import com.ckiroshan.urlshortener.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,10 +21,13 @@ import org.springframework.stereotype.Service;
 public class ShortUrlServiceImpl implements ShortUrlService {
     private final ShortUrlRepository shortUrlRepository;
     private final ShortUrlMapper shortUrlMapper;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional // Ensures atomic DB operations
-    public ShortUrlResponse createShortUrl(ShortUrlRequest shortUrlRequest, User user) {
+    public ShortUrlResponse createShortUrl(ShortUrlRequest shortUrlRequest, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new BadRequestException("User not found"));
         // Check if provided custom code already exists
         if (shortUrlRequest.getCustomShortCode() != null &&
                 shortUrlRepository.existsByShortCode(shortUrlRequest.getCustomShortCode())) {
