@@ -14,12 +14,14 @@ import com.ckiroshan.urlshortener.repository.ShortUrlRepository;
 import com.ckiroshan.urlshortener.service.ShortUrlService;
 import com.ckiroshan.urlshortener.user.entity.User;
 import com.ckiroshan.urlshortener.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -71,6 +73,69 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     // Analytics related logic ===>
+    @Override
+    @Transactional
+    public String getOriginalUrlWithTracking(String shortCode, HttpServletRequest request) {
+        // Retrieves original URL & logs access analytics
+        String originalUrl = this.getOriginalUrl(shortCode); // Gets the cached URL
+        trackAccess(shortCode, request); // Records the access
+        return originalUrl;
+    }
+
+    @Override
+    @Transactional
+    public void trackAccess(String shortCode, HttpServletRequest request) {
+        // Increments click count & saves analytics data
+        // Tracking implementation
+        ShortUrl shortUrl = shortUrlRepository.findByShortCode(shortCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Short URL not found"));
+        // Increment click count
+        shortUrl.setClickCount(shortUrl.getClickCount() + 1);
+        shortUrlRepository.save(shortUrl);
+        // Builds & saves analytics entry
+        UrlAnalytics analytics = UrlAnalytics.builder()
+                .shortUrl(shortUrl)
+                .accessedAt(LocalDateTime.now())
+                .ipAddress(getClientIp(request))
+                .userAgent(request.getHeader("User-Agent"))
+                .referrer(getSanitizedReferrer(request))
+                .country(detectCountry(request))
+                .deviceType(detectDeviceType(request))
+                .build();
+        analyticsRepository.save(analytics);
+    }
+
+    // Retrieves client IP address from request headers
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty()) {
+            ip = request.getRemoteAddr();
+        }
+        // Handle IPv6 localhost case
+        return ip.equals("0:0:0:0:0:0:0:1") ? "127.0.0.1" : ip;
+    }
+
+    // Returns referer or marks as 'direct' if not available
+    private String getSanitizedReferrer(HttpServletRequest request) {
+        String referrer = request.getHeader("referer");
+        return (referrer != null && !referrer.trim().isEmpty()) ? referrer : "direct";
+    }
+
+    // Placeholder for country detection (Will be implemented later)
+    private String detectCountry(HttpServletRequest request) {
+        // (Expect: To be Implemented using GeoIP or external service)
+        return "Unknown";
+    }
+
+    // Detects device type based on User-Agent string
+    private String detectDeviceType(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent == null) return "Unknown";
+        if (userAgent.contains("Mobile")) return "Mobile";
+        if (userAgent.contains("Tablet")) return "Tablet";
+        return "Desktop";
+    }
+
     @Override
     public AnalyticsResponse getAnalytics(String shortCode, String userEmail) {
         // Retrieves user & URL, verifies ownership, then returns analytics
