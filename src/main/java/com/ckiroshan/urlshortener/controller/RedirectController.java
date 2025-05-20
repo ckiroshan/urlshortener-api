@@ -1,6 +1,7 @@
 package com.ckiroshan.urlshortener.controller;
 
 import com.ckiroshan.urlshortener.service.ShortUrlService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,9 @@ public class RedirectController {
 
     @GetMapping("/{shortCode}")
     // Handles GET requests to short URLs & redirects to original URL
-    public ResponseEntity<Void> redirect(@PathVariable String shortCode) {
-        String originalUrl = shortUrlService.getOriginalUrl(shortCode);
+    public ResponseEntity<Void> redirect(@PathVariable String shortCode,
+                                         HttpServletRequest request) {
+        String originalUrl = shortUrlService.getOriginalUrlWithTracking(shortCode, request);
         // Responds with 302 FOUND and redirects to the original URL
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(originalUrl))
