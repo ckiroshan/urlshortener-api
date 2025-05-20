@@ -1,5 +1,9 @@
 package com.ckiroshan.urlshortener.service.impl;
 
+import com.ckiroshan.urlshortener.analytics.dto.AnalyticsResponse;
+import com.ckiroshan.urlshortener.analytics.entity.UrlAnalytics;
+import com.ckiroshan.urlshortener.analytics.mapper.AnalyticsMapper;
+import com.ckiroshan.urlshortener.analytics.repository.UrlAnalyticsRepository;
 import com.ckiroshan.urlshortener.dto.ShortUrlRequest;
 import com.ckiroshan.urlshortener.dto.ShortUrlResponse;
 import com.ckiroshan.urlshortener.entity.ShortUrl;
@@ -16,11 +20,15 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor // Generates constructor with required (final) fields
 public class ShortUrlServiceImpl implements ShortUrlService {
     private final ShortUrlRepository shortUrlRepository;
+    private final UrlAnalyticsRepository analyticsRepository;
     private final ShortUrlMapper shortUrlMapper;
+    private final AnalyticsMapper analyticsMapper;
     private final UserRepository userRepository;
 
     @Override
@@ -60,5 +68,18 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .orElseThrow(() -> new ResourceNotFoundException("Short URL not found"));
         // Delete the entity from DB
         shortUrlRepository.delete(shortUrl);
+    }
+
+    // Analytics related logic ===>
+    @Override
+    public AnalyticsResponse getAnalytics(String shortCode, String userEmail) {
+        // Retrieves user & URL, verifies ownership, then returns analytics
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+        ShortUrl shortUrl = shortUrlRepository.findByShortCodeAndUser(shortCode, user)
+                .orElseThrow(() -> new ResourceNotFoundException("URL not found or unauthorized"));
+        // Fetches all analytics records associated with given short URL
+        List<UrlAnalytics> analytics = analyticsRepository.findByShortUrl(shortUrl);
+        return analyticsMapper.toAnalyticsResponse(shortUrl, analytics);
     }
 }
