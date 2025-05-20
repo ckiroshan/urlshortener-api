@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-
 public class ShortUrl {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // Auto-increments the ID
@@ -20,6 +19,8 @@ public class ShortUrl {
     private String originalUrl;
     @CreationTimestamp // Timestamp when the entity is created
     private LocalDateTime createdAt = LocalDateTime.now(); // Default value is local time
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int clickCount = 0;  // Tracks click count (Default 0)
     @ManyToOne(fetch = FetchType.LAZY) // Many ShortUrls can belong to one User
     @JoinColumn(name = "user_id", nullable = false) // Foreign key column in the DB
     private User user;
