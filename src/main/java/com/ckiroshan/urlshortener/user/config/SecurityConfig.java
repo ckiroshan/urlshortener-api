@@ -1,5 +1,6 @@
 package com.ckiroshan.urlshortener.user.config;
 
+import com.ckiroshan.urlshortener.ratelimiting.config.RateLimitingFilter;
 import com.ckiroshan.urlshortener.user.repository.UserRepository;
 import com.ckiroshan.urlshortener.user.service.impl.JwtServiceImpl;
 import com.ckiroshan.urlshortener.user.service.impl.UserDetailsServiceImpl;
@@ -17,12 +18,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final UserRepository userRepository;
+    private final RateLimitingFilter rateLimitingFilter;
 
     @Bean
     // Main security filter chain configuration
@@ -37,6 +40,8 @@ public class SecurityConfig {
                         // Enforce stateless session (JWT-based auth)
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                // Apply rate limiting filter before User authentication
+                .addFilterBefore(rateLimitingFilter, BasicAuthenticationFilter.class)
                 // Add JWT filter before the default UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
