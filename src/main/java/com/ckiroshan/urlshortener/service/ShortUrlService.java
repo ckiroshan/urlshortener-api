@@ -1,8 +1,8 @@
 package com.ckiroshan.urlshortener.service;
 
-import com.ckiroshan.urlshortener.analytics.dto.AnalyticsResponse;
-import com.ckiroshan.urlshortener.dto.ShortUrlRequest;
-import com.ckiroshan.urlshortener.dto.ShortUrlResponse;
+import com.ckiroshan.urlshortener.dto.analytics.AnalyticsResponse;
+import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlRequest;
+import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface ShortUrlService {

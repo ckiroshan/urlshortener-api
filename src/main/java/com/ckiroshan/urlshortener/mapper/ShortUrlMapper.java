@@ -1,7 +1,7 @@
 package com.ckiroshan.urlshortener.mapper;
 
-import com.ckiroshan.urlshortener.dto.ShortUrlRequest;
-import com.ckiroshan.urlshortener.dto.ShortUrlResponse;
+import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlRequest;
+import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlResponse;
 import com.ckiroshan.urlshortener.entity.ShortUrl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

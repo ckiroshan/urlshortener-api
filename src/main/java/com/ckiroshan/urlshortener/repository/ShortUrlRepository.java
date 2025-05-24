@@ -1,7 +1,7 @@
 package com.ckiroshan.urlshortener.repository;
 
 import com.ckiroshan.urlshortener.entity.ShortUrl;
-import com.ckiroshan.urlshortener.user.entity.User;
+import com.ckiroshan.urlshortener.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

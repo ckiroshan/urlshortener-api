@@ -1,19 +1,19 @@
 package com.ckiroshan.urlshortener.service.impl;
 
-import com.ckiroshan.urlshortener.analytics.dto.AnalyticsResponse;
-import com.ckiroshan.urlshortener.analytics.entity.UrlAnalytics;
-import com.ckiroshan.urlshortener.analytics.mapper.AnalyticsMapper;
-import com.ckiroshan.urlshortener.analytics.repository.UrlAnalyticsRepository;
-import com.ckiroshan.urlshortener.dto.ShortUrlRequest;
-import com.ckiroshan.urlshortener.dto.ShortUrlResponse;
+import com.ckiroshan.urlshortener.dto.analytics.AnalyticsResponse;
+import com.ckiroshan.urlshortener.entity.UrlAnalytics;
+import com.ckiroshan.urlshortener.mapper.AnalyticsMapper;
+import com.ckiroshan.urlshortener.repository.UrlAnalyticsRepository;
+import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlRequest;
+import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlResponse;
 import com.ckiroshan.urlshortener.entity.ShortUrl;
 import com.ckiroshan.urlshortener.exception.BadRequestException;
 import com.ckiroshan.urlshortener.exception.ResourceNotFoundException;
 import com.ckiroshan.urlshortener.mapper.ShortUrlMapper;
 import com.ckiroshan.urlshortener.repository.ShortUrlRepository;
 import com.ckiroshan.urlshortener.service.ShortUrlService;
-import com.ckiroshan.urlshortener.user.entity.User;
-import com.ckiroshan.urlshortener.user.repository.UserRepository;
+import com.ckiroshan.urlshortener.entity.User;
+import com.ckiroshan.urlshortener.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
