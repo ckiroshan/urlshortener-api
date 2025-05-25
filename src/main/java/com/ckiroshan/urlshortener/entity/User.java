@@ -21,4 +21,6 @@ public class User {
     private UserRole role;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL) // One user can have many short URLs
     private List<ShortUrl> shortUrls = new ArrayList<>();
+    @Column(nullable = false) // Active flag to enable/disable user
+    private boolean active = true;
 }
