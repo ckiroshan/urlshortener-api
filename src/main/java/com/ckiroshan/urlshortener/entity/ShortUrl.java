@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -23,4 +25,6 @@ public class ShortUrl {
     @ManyToOne(fetch = FetchType.LAZY) // Many ShortUrls can belong to one User
     @JoinColumn(name = "user_id", nullable = false) // Foreign key column in the DB
     private User user;
+    @OneToMany(mappedBy = "shortUrl", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UrlAnalytics> analytics = new ArrayList<>(); // Analytics entries linked to this short URL
 }
