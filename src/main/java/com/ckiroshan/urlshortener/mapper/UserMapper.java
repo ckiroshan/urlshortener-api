@@ -1,5 +1,6 @@
 package com.ckiroshan.urlshortener.mapper;
 
+import com.ckiroshan.urlshortener.dto.admin.UserResponse;
 import com.ckiroshan.urlshortener.dto.user.AuthResponse;
 import com.ckiroshan.urlshortener.dto.user.RegisterRequest;
 import com.ckiroshan.urlshortener.entity.User;
@@ -22,6 +23,16 @@ public class UserMapper {
                 .token(token)
                 .email(user.getEmail())
                 .role(user.getRole())
+                .build();
+    }
+
+    // Converts a User entity to a UserResponse DTO
+    public UserResponse toResponseDto(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .active(user.isActive())
                 .build();
     }
 }
