@@ -1,5 +1,6 @@
 package com.ckiroshan.urlshortener.mapper;
 
+import com.ckiroshan.urlshortener.dto.admin.AdminUrlResponse;
 import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlRequest;
 import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlResponse;
 import com.ckiroshan.urlshortener.entity.ShortUrl;
@@ -35,5 +36,16 @@ public class ShortUrlMapper {
     // Generates a random 6-character string using UUID
     private String generateRandomCode() {
         return UUID.randomUUID().toString().substring(0, 6);
+    }
+
+    // Converts a ShortUrl entity to an AdminUrlResponse DTO
+    public AdminUrlResponse toAdminUrlResponse(ShortUrl shortUrl) {
+        return AdminUrlResponse.builder()
+                .shortCode(shortUrl.getShortCode())
+                .originalUrl(shortUrl.getOriginalUrl())
+                .createdBy(shortUrl.getUser() != null ? shortUrl.getUser().getEmail() : "Anonymous")
+                .createdAt(shortUrl.getCreatedAt())
+                .clickCount(shortUrl.getClickCount())
+                .build();
     }
 }
