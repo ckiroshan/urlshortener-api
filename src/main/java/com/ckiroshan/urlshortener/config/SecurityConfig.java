@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints (auth, URL redirect, error)
                         .requestMatchers("/api/auth/**", "/{shortCode}", "/error").permitAll()
+                        // Admin only endpoints
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
