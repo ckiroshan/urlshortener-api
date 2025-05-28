@@ -74,4 +74,16 @@ public class GlobalExceptionHandler {
         // Returns a structured error response
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
+
+    // Handles custom Forbidden Exceptions
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),       // HTTP status code (403)
+                ex.getMessage(),                   // Error message from exception
+                System.currentTimeMillis()        // Timestamp of error
+        );
+        // Returns a structured error response
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
 }
