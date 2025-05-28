@@ -1,7 +1,10 @@
 package com.ckiroshan.urlshortener.service.impl;
 
+import com.ckiroshan.urlshortener.dto.admin.AdminStatsResponse;
+import com.ckiroshan.urlshortener.dto.admin.AdminUrlResponse;
 import com.ckiroshan.urlshortener.dto.analytics.AnalyticsResponse;
 import com.ckiroshan.urlshortener.entity.UrlAnalytics;
+import com.ckiroshan.urlshortener.exception.ForbiddenException;
 import com.ckiroshan.urlshortener.mapper.AnalyticsMapper;
 import com.ckiroshan.urlshortener.repository.UrlAnalyticsRepository;
 import com.ckiroshan.urlshortener.dto.shorturl.ShortUrlRequest;
@@ -14,6 +17,7 @@ import com.ckiroshan.urlshortener.repository.ShortUrlRepository;
 import com.ckiroshan.urlshortener.service.ShortUrlService;
 import com.ckiroshan.urlshortener.entity.User;
 import com.ckiroshan.urlshortener.repository.UserRepository;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor // Generates constructor with required (final) fields
@@ -63,11 +69,17 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     @Override
     @Transactional
     @CacheEvict(value = "shortUrls", key = "#shortCode") // Evicts cached URL on deletion
-    public void deleteShortUrl(String shortCode) {
+    public void deleteShortUrl(String shortCode, @Nullable String userEmail) {
         // Find short URL entity
         ShortUrl shortUrl = shortUrlRepository.findByShortCode(shortCode)
                 // Throw 404 if not found
                 .orElseThrow(() -> new ResourceNotFoundException("Short URL not found"));
+        if (userEmail != null &&
+        (shortUrl.getUser() == null ||
+                !shortUrl.getUser().getEmail().equals(userEmail))) {
+            // Throw 403 if not Auth User or Admin
+            throw new ForbiddenException("You don't have permission to delete this URL");
+        }
         // Delete the entity from DB
         shortUrlRepository.delete(shortUrl);
     }
@@ -146,5 +158,46 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         // Fetches all analytics records associated with given short URL
         List<UrlAnalytics> analytics = analyticsRepository.findByShortUrl(shortUrl);
         return analyticsMapper.toAnalyticsResponse(shortUrl, analytics);
+    }
+
+    // Admin related logic ===>
+    @Override
+    public List<AdminUrlResponse> getAllUrlsForAdmin() {
+        // Returns all shortened URLs with admin-level details
+        return shortUrlRepository.findAll().stream()
+                .map(shortUrlMapper::toAdminUrlResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AdminStatsResponse getSystemStats() {
+        // Gathers system-wide statistics for admin dashboard
+        long totalUrls = shortUrlRepository.count();
+        long totalClicks = shortUrlRepository.totalClicks();
+        long activeUsers = userRepository.countByActive(true);
+
+        // Handle country stats
+        Map<String, Long> countryStats = analyticsRepository.countClicksByCountry()
+                .stream()
+                .collect(Collectors.toMap(
+                        arr -> (String) arr[0],
+                        arr -> (Long) arr[1]
+                ));
+
+        // Handle device stats
+        Map<String, Long> deviceStats = analyticsRepository.countClicksByDeviceType()
+                .stream()
+                .collect(Collectors.toMap(
+                        arr -> (String) arr[0],
+                        arr -> (Long) arr[1]
+                ));
+
+        return AdminStatsResponse.builder()
+                .totalUrls(totalUrls)
+                .totalClicks(totalClicks)
+                .activeUsers(activeUsers)
+                .clicksByCountry(countryStats)
+                .deviceDistribution(deviceStats)
+                .build();
     }
 }
